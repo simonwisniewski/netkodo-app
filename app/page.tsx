@@ -1,16 +1,38 @@
+"use client";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 
-export default async function Home() {
-  const numbers = await fetch("http://localhost:3000/api/numbers", {
-    method: "GET",
-  });
-  const dataNumbers = JSON.parse(await numbers.text());
+export default function Home() {
+  const [dataNumbers, setDataNumbers] = useState([]);
+  const [dataImages, setDataImages] = useState([]);
 
-  const images = await fetch("http://localhost:3000/api/images", {
-    method: "POST",
-    body: JSON.stringify({ numbers: dataNumbers }),
-  });
-  const dataImages = JSON.parse(await images.text());
+  useEffect(() => {
+    async function fetchNumbers() {
+      const response = await fetch("http://localhost:3000/api/numbers");
+      const data = await response.json();
+      setDataNumbers(data);
+    }
+
+    fetchNumbers();
+  }, []);
+
+  useEffect(() => {
+    async function fetchImages() {
+      if (dataNumbers.length > 0) {
+        const response = await fetch("http://localhost:3000/api/images", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ numbers: dataNumbers }),
+        });
+        const data = await response.json();
+        setDataImages(data);
+      }
+    }
+
+    fetchImages();
+  }, [dataNumbers]);
   return (
     <main className="min-h-screen w-full bg-slate-900">
       <div className="flex size-full flex-col items-center justify-center gap-6 p-6">
